@@ -4,7 +4,7 @@
 ## Intruduction
 This project is completed jointly by Yixu Wang,  Jiaqi Dong, Rui Zhu.<br/>
 
-## The dataset used can be found from <br/> 
+## The dataset used can be found from https://archive.ics.uci.edu/ml/datasets/Beijing+PM2.5+Data<br/> 
 <br/>
 
 ## It contains following parts:<br/>
