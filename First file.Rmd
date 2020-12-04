@@ -19,3 +19,25 @@ AIC(first_lm)
 
 ```
 
+Steps to be done:
+
+## Early steps
+1. Calculate p-value for each predictor (Single parameter test)
+2. Come out with some hypothese that which predictors are not significant (Nested model + ANOVA)
+3. Test for interactions (details yet to come)
+4. Model diagnostics 
+  4.1 Linearity
+  4.2 Normality
+  4.3 Equal variance
+  4.4 Independence using time series (difficult)
+5. Check for unusual observations (Cook's distance for outliers or graphs)
+6. See if response transformation is needed (Variance stabilization or box-cox transformation)
+7. Check if predictors have multicollinearity (VIF)
+
+
+## Finishing up
+8. Variable selection (which variables to keep, based on previous results and AIC, BIC or PRESS test)
+9. Come to conclusion and finish report
+
+
+
