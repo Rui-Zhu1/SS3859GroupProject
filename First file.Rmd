@@ -9,10 +9,13 @@ output: html_document
 data <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/00381/PRSA_data_2010.1.1-2014.12.31.csv")
 ```
 
-
+# Change the wind into a factor variable, attempt first fit of the model
 ```{r}
 str(data)
-
+data$cbwd <- as.factor(data$cbwd)
+first_lm <- lm(pm2.5 ~., data = data)
+summary(first_lm)
+AIC(first_lm)
 
 ```
 
