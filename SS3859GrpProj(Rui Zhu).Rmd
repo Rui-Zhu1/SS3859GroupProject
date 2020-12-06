@@ -13,17 +13,14 @@ output:
 \newpage
 # 1. Calculate p-value for each predictor
 ```{r}
-
-df <- read.csv(file = 'PM2.5.csv')
-df=na.omit(df)
+data <- read.csv(file = 'PM2.5.csv')
+data=na.omit(data)
 set.seed(3859)
-index <- sample(1:nrow(df), 2000)
-df=df[index, ]
-nrow(df)
-head(df)
-model1=lm(pm2.5 ~ DEWP+TEMP+PRES+cbwd+Iws+Is+Ir, data=df)
-summary(model1)
+data$cbwd <- as.factor(data$cbwd)
+data <- data[-c(1)]
 
+index <- sample(1:nrow(data), 2000)
+df=data[index, ]
 ```
 
 # 2. Some hypothese that which predictors are not significant 
@@ -155,16 +152,16 @@ length(timeset)
 
 ```{r}
 # Outlier check
-outlier_original <- data[which(abs(rstandard(model1))>2),]
+outlier_original <- df[which(abs(rstandard(model1))>2),]
 nrow(outlier_original)
 
-outlier_improved <- data[which(abs(rstandard(modelX))>2),]
+outlier_improved <- df[which(abs(rstandard(modelX))>2),]
 nrow(outlier_improved)
 
 # About 5% of the data are outliers
 
 # Now use Cook's distance to check for influential points
-data[cooks.distance(modelX) > 4 / length(cooks.distance(modelX)),]
+df[cooks.distance(modelX) > 4 / length(cooks.distance(modelX)),]
 
 # Despite there are only 95 outliers, 1151 of the data have heavy influence on the model.
 # We may still need to modify the model
@@ -174,6 +171,65 @@ data[cooks.distance(modelX) > 4 / length(cooks.distance(modelX)),]
 # 7. Attempt transformations to model
 ```{r}
 library(MASS)
+
+attach(df)
+boxcox(pm2.5 ~ Iws + I(TEMP * PRES) + I(DEWP * PRES) + 
+    cbwd + DEWP + I(PRES * Ir) + PRES + I(DEWP * Iws) + I(TEMP * 
+    Iws) + I(PRES * Iws) + I(Iws * Ir) + I(Is * TEMP) + I(Is * 
+    Iws) + I(Is * PRES) + TEMP, lambda = seq(-0 ,0.2, length = 20))
+detach(df)
+# take lambda = 0.11, we can try both log transformation and (y^lambda-1)/lambda
+lambda = 0.11
+modelX_BC_transf <- lm((pm2.5^lambda-1)/lambda ~ Iws + I(TEMP * PRES) + I(DEWP * PRES) + 
+    cbwd + DEWP + I(PRES * Ir) + PRES + I(DEWP * Iws) + I(TEMP * 
+    Iws) + I(PRES * Iws) + I(Iws * Ir) + I(Is * TEMP) + I(Is * 
+    Iws) + I(Is * PRES) + TEMP, data = df)
+modelX_BC_transf
+AIC(modelX_BC_transf)
+AIC(modelX)
+
+
+# Repeat step 5
+plot(fitted(modelX_BC_transf), resid(modelX_BC_transf),
+     col = "blue", pch = 10,
+     xlab = "fitted value",
+     ylab = "residual",
+     cex=1,
+     main = "residual plot")
+qqnorm(resid(modelX_BC_transf), col = "grey",pch=20,cex=2)
+qqline(resid(modelX_BC_transf))
+bptest(modelX)
+shapiro.test(resid(modelX))
+
+# Compare to the previous model, normality significantly improved. The P-value for both BP test and Shapiro test are still small, meaning that the assumptions are not met.
+```
+We will use the updated model, modelX_BC_transf next
+
+# 8. Check if predictors have multicollinearity, using VIF
+
+```{r}
+vif(modelX_BC_transf)
+vif(model1)
+# By comparing the results of the complicated model and the simplest model, we can see that although the VIF of some predictors from the more complicated model is high, the model still fits the data better. 
+# This is a tradeoff between more predictors and high VIF
+# The high VIF is due to interactions
+# We will trust the model selected by AIC test instead
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
