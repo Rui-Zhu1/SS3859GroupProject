@@ -11,10 +11,10 @@ output:
 
 
 \newpage
-# Calculate p-value for each predictor
+# 1. Calculate p-value for each predictor
 ```{r}
 
-df <- read.csv(file = 'PRSA_data_2010.1.1-2014.12.31.csv')
+df <- read.csv(file = 'PM2.5.csv')
 df=na.omit(df)
 set.seed(3859)
 index <- sample(1:nrow(df), 2000)
@@ -26,7 +26,7 @@ summary(model1)
 
 ```
 
-# Some hypothese that which predictors are not significant 
+# 2. Some hypothese that which predictors are not significant 
  * By observing the summary table of the full model, we make the null hypothesis that the Is is not significantly important to explain this model.
 ```{r}
 #reduced model without Is
@@ -41,7 +41,7 @@ anova(model1,model2)
  
  
  
-# Test for interactions(2 way interaction)
+# 3. Test for interactions(2 way interaction)
 ```{r}
 model4=lm(pm2.5 ~ DEWP+TEMP+PRES+cbwd+Iws+Ir+Is+I(DEWP*TEMP)+I(DEWP*PRES)+I(DEWP*Iws)+I(DEWP*Ir)+I(TEMP*PRES)+I(TEMP*Iws)+I(TEMP*Ir)+I(PRES*Iws)+I(PRES*Ir)+I(Iws*Ir)+I(Is*TEMP)+I(Is*DEWP)+I(Is*PRES)+I(Is*Iws)+I(Is*Ir), data=df)
 
@@ -58,7 +58,7 @@ anova(model4,model5)
  * The large p-value in anova indicates there is no significant difference between the two models.
  
  
-# Variable selection (which variables to keep, based on previous results and AIC, BIC or PRESS test)
+# 4. Variable selection (which variables to keep, based on previous results and AIC, BIC or PRESS test)
 ```{r}
 nullfit <- lm(pm2.5~1,data=df)
 stepAppro_aic = step(nullfit,
@@ -89,40 +89,40 @@ press(lm(formula = pm2.5 ~ DEWP + PRES + cbwd + Iws + I(DEWP * PRES) +
 
 
 
-# Model diagnostics on one well-fit model
+# 5. Model diagnostics on one well-fit model
 ```{r}
 library(lmtest)
 #we will be using the model selected by AIC in later learning
-model=lm(formula = pm2.5 ~ Iws + I(TEMP * PRES) + I(DEWP * PRES) + 
+modelX=lm(formula = pm2.5 ~ Iws + I(TEMP * PRES) + I(DEWP * PRES) + 
     cbwd + DEWP + I(PRES * Ir) + PRES + I(DEWP * Iws) + I(TEMP * 
     Iws) + I(PRES * Iws) + I(Iws * Ir) + I(Is * TEMP) + I(Is * 
     Iws) + I(Is * PRES) + TEMP, data = df)
-plot(fitted(model), resid(model),
+plot(fitted(modelX), resid(modelX),
      col = "blue", pch = 10,
      xlab = "fitted value",
      ylab = "residual",
      cex=1,
      main = "residual plot")
-qqnorm(resid(model), col = "grey",pch=20,cex=2)
-qqline(resid(model))
-loggedModel=lm(formula = log(pm2.5) ~ Iws + I(TEMP * PRES) + I(DEWP * PRES) + 
+qqnorm(resid(modelX), col = "grey",pch=20,cex=2)
+qqline(resid(modelX))
+loggedModelX=lm(formula = log(pm2.5) ~ Iws + I(TEMP * PRES) + I(DEWP * PRES) + 
     cbwd + DEWP + I(PRES * Ir) + PRES + I(DEWP * Iws) + I(TEMP * 
     Iws) + I(PRES * Iws) + I(Iws * Ir) + TEMP, data = df)
-plot(fitted(loggedModel), resid(loggedModel),
+plot(fitted(loggedModelX), resid(loggedModelX),
      col = "blue", pch = 10,
      xlab = "fitted value",
      ylab = "residual",
      cex=1,
      main = "residual plot")
-bptest(model)
-shapiro.test(resid(model))
+bptest(modelX)
+shapiro.test(resid(modelX))
 
 timeset=c()
 residset=c()
 i=1
 while (i<nrow(df)){
   timeset=append(timeset, as.Date(paste(df[i,"month"],df[i,"day"],df[i,"year"],sep="/"), "%m/%d/%Y"))
-  residset=append(residset, df[i, "pm2.5"]-predict(model, df[i,]))
+  residset=append(residset, df[i, "pm2.5"]-predict(modelX, df[i,]))
   i=i+1
 }
 plot(timeset, residset,
@@ -150,14 +150,37 @@ length(timeset)
 
 
 
+# 6. Check for unusual observations (Cook's distance for outlier using model )
+
+
+```{r}
+# Outlier check
+outlier_original <- data[which(abs(rstandard(model1))>2),]
+nrow(outlier_original)
+
+outlier_improved <- data[which(abs(rstandard(modelX))>2),]
+nrow(outlier_improved)
+
+# About 5% of the data are outliers
+
+# Now use Cook's distance to check for influential points
+data[cooks.distance(modelX) > 4 / length(cooks.distance(modelX)),]
+
+# Despite there are only 95 outliers, 1151 of the data have heavy influence on the model.
+# We may still need to modify the model
+```
+
+
+# 7. Attempt transformations to model
+```{r}
+library(MASS)
 
 
 
 
 
 
-
-
+```
 
 
 
