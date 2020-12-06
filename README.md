@@ -9,7 +9,7 @@ This project is completed jointly by Yixu Wang,  Jiaqi Dong, Rui Zhu.<br/>
 
 ## It contains following parts:<br/>
   ### Early steps<br/>
-  ### 1. Calculate p-value for each predictor (Single parameter test)<br/>
+  ### 1. Calculate p-value for each predictor (Single parameter test)(RuiZhu)<br/>
   ### 2. Come out with some hypothese that which predictors are not significant (Nested model + ANOVA)<br/>
   ### 3. Test for interactions (details yet to come)<br/>
   ### 4. Model diagnostics <br/>
